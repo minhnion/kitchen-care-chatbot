@@ -7,6 +7,9 @@ from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
+from langchain.schema.runnable import RunnableMap
+
+from utils import format_docs
 
 load_dotenv()
 FAISS_INDEX_PATH = "faiss_index_products"
@@ -43,10 +46,12 @@ class ChatbotService:
             temperature=0.1,
         )
         
+        context_chain = self.retriever | format_docs
+        
         rag_template = """
         Bạn là một trợ lý ảo tư vấn sản phẩm cho cửa hàng 'Kitchen Care'.
         Hãy trả lời câu hỏi của người dùng chỉ dựa trên các thông tin sản phẩm được cung cấp dưới đây.
-        Nếu thông tin không đủ để trả lời, hãy nói rằng "Để biết thêm thông tin chi tiết vui lòng liên lạc với đội ngũ hỗ trợ trên trang web."
+        Nếu thông tin không đủ để trả lời, hãy nói rằng "Xin lỗi, tôi không tìm thấy thông tin liên quan."
         Không được tự bịa ra thông tin. Trả lời một cách thân thiện và chuyên nghiệp.
 
         Thông tin sản phẩm (Context):
@@ -59,18 +64,31 @@ class ChatbotService:
         """
         self.rag_prompt = PromptTemplate.from_template(rag_template)
 
-        self.rag_chain = (
-            {"context": self.retriever, "question": RunnablePassthrough()}
-            | self.rag_prompt
-            | self.llm
-            | StrOutputParser()
+        self.rag_chain = RunnableMap(
+            {
+                "source_documents": self.retriever,
+                
+                "answer": (
+                    {"context": context_chain, "question": RunnablePassthrough()}
+                    | self.rag_prompt
+                    | self.llm
+                    | StrOutputParser()
+                ),
+            }
         )
         
-    def ask(self, query: str) -> str:
+    def ask(self, query: str) -> dict:
         if not query:
-            return "Vui lòng đặt một câu hỏi."
-        bot_response = self.rag_chain.invoke(query)
-        return bot_response
+            return {
+                "answer": "Vui lòng đặt một câu hỏi",
+                "source_documents": []
+            }
+            
+        response_dict = self.rag_chain.invoke(query)
+        source_docs_metadata = [doc.metadata for doc in response_dict.get("source_documents",[])]
+        response_dict["source_documents"] = source_docs_metadata
+        
+        return response_dict
 
 try:
     chatbot_instance = ChatbotService()

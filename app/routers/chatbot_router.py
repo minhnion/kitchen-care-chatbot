@@ -22,8 +22,8 @@ def handle_chat(request_body: ChatRequest):
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     
     try:
-        bot_response = chatbot_instance.ask(user_message)
-        return {"reply": bot_response}
+        bot_response_dict = chatbot_instance.ask(user_message)
+        return bot_response_dict
     except Exception as e:
         print(f"An error occurred during RAG chain invocation: {e}")
         raise HTTPException(status_code=500, detail="An internal error occurred.")
