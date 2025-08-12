@@ -1,30 +1,19 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from app.services import chatbot_instance
+from fastapi import APIRouter
+from ..models import ChatRequest, ChatResponse
+
+from ..controller.chatbot_controller import chatbot_controller
 
 router = APIRouter(
     prefix="/api/v1/chatbot",  
-    tags=["Chatbot"],        
+    tags=["Chatbot"],   
 )
 
-class ChatRequest(BaseModel):
-    message: str
 
-@router.post("/chat")
+@router.post(
+    "/chat", 
+    summary="Chat with the AI assistant",
+    response_model=ChatResponse
+)
+
 def handle_chat(request_body: ChatRequest):
-    if chatbot_instance is None:
-        raise HTTPException(
-            status_code=503, 
-            detail="Chatbot service is not available due to an initialization error."
-        )
-
-    user_message = request_body.message
-    if not user_message:
-        raise HTTPException(status_code=400, detail="Message cannot be empty")
-    
-    try:
-        bot_response_dict = chatbot_instance.ask(user_message)
-        return bot_response_dict
-    except Exception as e:
-        print(f"An error occurred during RAG chain invocation: {e}")
-        raise HTTPException(status_code=500, detail="An internal error occurred.")
+    return chatbot_controller.handle_chat_request(request_body)
