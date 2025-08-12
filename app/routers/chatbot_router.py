@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.services.chatbot_service import chatbot_instance
+from app.services import chatbot_instance
+
 router = APIRouter(
     prefix="/api/v1/chatbot",  
     tags=["Chatbot"],        

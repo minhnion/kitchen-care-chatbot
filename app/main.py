@@ -1,10 +1,6 @@
 from fastapi import FastAPI
-from dotenv import load_dotenv
-import os
-
 from .routers import chatbot_router
-
-load_dotenv()
+from .config import settings
 
 app = FastAPI(
     title="Kitchen Care Chatbot Service",
@@ -12,7 +8,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
-print(f"MongoDB URI from env: {os.getenv('MONGODB_URI')}")
+print(f"MongoDB URI from config: {settings.MONGODB_URI}")
 
 app.include_router(chatbot_router.router)
 

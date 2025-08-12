@@ -1,0 +1,1 @@
+from .chatbot_service import chatbot_instance
