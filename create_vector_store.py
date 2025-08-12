@@ -7,7 +7,7 @@ from langchain_community.vectorstores import FAISS
 
 load_dotenv()
 MONGODB_URI = os.getenv("MONGODB_URI")
-DB_NAME = "kitchen-care-pro"
+DB_NAME = "kitchen-care"
 PRODUCT_COLLECTION = "products"
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 FAISS_INDEX_PATH = "faiss_index_products"
