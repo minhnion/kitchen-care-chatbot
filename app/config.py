@@ -17,4 +17,7 @@ class Settings(BaseSettings):
     #FAISS
     FAISS_INDEX_PATH: str = "faiss_index_products"
     
+    CHUNK_SIZE: int = 256
+    CHUNK_OVERLAP: int = 50
+    
 settings = Settings()
