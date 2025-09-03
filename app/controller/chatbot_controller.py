@@ -19,7 +19,7 @@ class ChatbotController:
         try:
             history_as_dict = [item.dict() for item in request_body.chat_history] if request_body.chat_history else None
 
-            response = self.chatbot_service.ask_with_memory(
+            response = self.chatbot_service.ask(
                 query=request_body.message,
                 session_id=request_body.session_id,
                 chat_history_from_request=history_as_dict
